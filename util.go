@@ -12,6 +12,9 @@ func getBlock(blocks hcl.Blocks, tagName string, labels []string) (int, *hcl.Blo
 		if block.Type != tagName {
 			continue
 		}
+		if len(labels) == 0 {
+			return k, block
+		}
 		if len(labels) != len(block.Labels) {
 			return -1, nil
 		}

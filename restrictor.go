@@ -103,7 +103,10 @@ func restrictStruct(body hcl.Body, ctx *hcl.EvalContext, val reflect.Value) hcl.
 			continue
 		}
 		labels := getLabels(fieldValue)
-		_, block := getBlock(content.Blocks, tagName, labels)
+		k, block := getBlock(content.Blocks, tagName, labels)
+		if k == -1 {
+			continue
+		}
 		restrictDiags := restrictImpl(block.Body, ctx, fieldValue)
 		diags = append(diags, restrictDiags...)
 	}

@@ -16,8 +16,13 @@ import (
 type Config struct {
 	Version   *string         `hcl:"version"`
 	IOMode    string          `hcl:"io_mode"`
+	General   *GeneralConfig  `hcl:"general,block"`
 	Services  []ServiceConfig `hcl:"service,block"`
 	Flexibles []*Flexible     `hcl:"flexible,block"`
+}
+
+type GeneralConfig struct {
+	Env string `hcl:"env"`
 }
 
 type ServiceConfig struct {
@@ -70,6 +75,18 @@ func (cfg *Config) Restrict(content *hcl.BodyContent, ctx *hcl.EvalContext) hcl.
 		))
 	}
 	diags = append(diags, hclconfig.RestrictUniqueBlockLabels(content)...)
+	return diags
+}
+
+func (cfg *GeneralConfig) Restrict(content *hcl.BodyContent, ctx *hcl.EvalContext) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+	if cfg.Env == "" {
+		diags = append(diags, hclconfig.NewDiagnosticError(
+			"env need",
+			"",
+			hclconfig.AttributeRange(content, "env"),
+		))
+	}
 	return diags
 }
 
@@ -232,8 +249,9 @@ func TestLoadError(t *testing.T) {
 			path: "testdata/restrict",
 			expected: []string{
 				"[warn] on testdata/restrict/config.hcl:1,1-19: Recommend specifying version; I don't know the version of the configuration, so I'll load it as version 2",
+				"[error] on testdata/restrict/config.hcl:4,5-13: env need",
 				"[error] on testdata/restrict/config.hcl:1,1-19: Invalid io_mode; Possible values for io_mode are readwrite or readonly",
-				"[error] on testdata/restrict/config.hcl:8,1-22: Duplicate service \"http\" configuration; A http service named \"hoge\" was already declared at testdata/restrict/config.hcl:3,1-22. service names must unique per type in a configuration",
+				"[error] on testdata/restrict/config.hcl:12,1-22: Duplicate service \"http\" configuration; A http service named \"hoge\" was already declared at testdata/restrict/config.hcl:7,1-22. service names must unique per type in a configuration",
 			},
 		},
 	}

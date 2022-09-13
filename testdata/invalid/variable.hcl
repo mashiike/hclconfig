@@ -1,0 +1,3 @@
+variable "hoge" {
+    default = "hoge"
+}

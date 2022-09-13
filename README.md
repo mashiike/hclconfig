@@ -16,7 +16,7 @@
   * Interfaces to implement additional restrictions
 
 ## Requirements
-  * Go 1.17 or higher. support the 3 latest versions of Go.
+  * Go 1.18 or higher. support the 3 latest versions of Go.
 
 
 See [godoc.org/github.com/mashiike/hclconfig](https://godoc.org/github.com/mashiike/hclconfig).

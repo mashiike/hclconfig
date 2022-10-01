@@ -210,6 +210,33 @@ func TestLoadNoError(t *testing.T) {
 					})
 			},
 		},
+		{
+			path: "testdata/local",
+			check: func(t *testing.T, cfg *Config) {
+				requireConfigEqual(t,
+					cfg,
+					&Config{
+						Version: ptr("2"),
+						IOMode:  "readonly",
+						Flexibles: []*Flexible{
+							{
+								Type: "string",
+								Name: "hoge",
+								Payload: &FlexibleString{
+									Text: "hoge",
+								},
+							},
+							{
+								Type: "integer",
+								Name: "tora",
+								Payload: &FlexibleInt{
+									Number: 1,
+								},
+							},
+						},
+					})
+			},
+		},
 	}
 
 	for _, c := range cases {

@@ -9,7 +9,10 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
-const impliedVariablesCircuitBreak = 100
+const (
+	impliedVariablesCircuitBreak = 100
+	localVariablesCircuitBreak   = 100
+)
 
 func impliedVariables(body hcl.Body, ctx *hcl.EvalContext, val interface{}) (map[string]cty.Value, hcl.Diagnostics) {
 	cloned := &hcl.EvalContext{
@@ -129,4 +132,54 @@ func mergeVariables(dst map[string]cty.Value, src map[string]cty.Value) map[stri
 		dst[key] = cty.ObjectVal(mergeVariables(dstValueMap, srcValueMap))
 	}
 	return dst
+}
+
+func localVariables(body hcl.Body, ctx *hcl.EvalContext) (hcl.Body, map[string]cty.Value, hcl.Diagnostics) {
+	schema := &hcl.BodySchema{
+		Blocks: []hcl.BlockHeaderSchema{
+			{
+				Type: "locals",
+			},
+		},
+	}
+	content, remain, diags := body.PartialContent(schema)
+	if diags.HasErrors() {
+		return remain, nil, diags
+	}
+	if len(content.Blocks) == 0 {
+		return remain, nil, diags
+	}
+	ctx = ctx.NewChild()
+	variables := make(map[string]cty.Value)
+
+	for i := 0; i < localVariablesCircuitBreak; i++ {
+		for _, block := range content.Blocks {
+			switch block.Type {
+			case "locals":
+				attrs, attrDiags := block.Body.JustAttributes()
+				diags = append(diags, attrDiags...)
+				for key, attr := range attrs {
+					traversals := attr.Expr.Variables()
+					for _, traversal := range traversals {
+						if traversal.RootName() != "local" {
+							diags = append(diags, NewDiagnosticError("Local Variables", fmt.Sprintf("local variable a named `%s` refarence not local variable, in locals only refrence other local variable", key), attr.Range.Ptr()))
+						}
+					}
+					value, _ := attr.Expr.Value(ctx)
+					variables[key] = value
+				}
+			}
+		}
+		if diags.HasErrors() {
+			return remain, ctx.Variables, diags
+		}
+		ctx.Variables = map[string]cty.Value{
+			"local": cty.ObjectVal(variables),
+		}
+		if cty.ObjectVal(variables).IsWhollyKnown() {
+			return remain, ctx.Variables, diags
+		}
+	}
+	diags = append(diags, NewDiagnosticWarn("Local Variables", fmt.Sprintf("circit break! iterate %d eval, maybe cycle refrence", localVariablesCircuitBreak), nil))
+	return remain, ctx.Variables, diags
 }

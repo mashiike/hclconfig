@@ -11,6 +11,7 @@
 -----
 
 ## Features
+  * Local Variables
   * Implicit variables
   * Built-in functions using standard libraries 
   * Interfaces to implement additional restrictions
@@ -68,6 +69,28 @@ func main() {
 	//...
 }
 ```
+### Local Variables
+
+For example, the following statements are possible
+
+config/config.hcl
+```hcl
+locals {
+    addr = "http://127.0.0.1"   
+}
+io_mode = "readonly"
+
+service "http" "hoge" {
+  addr = local.addr 
+  port = 8080
+}
+
+service "http" "fuga" {
+  addr = local.addr 
+  port = 8081
+}
+```
+
 
 ### Implicit variables
 

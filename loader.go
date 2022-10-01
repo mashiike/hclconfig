@@ -80,11 +80,17 @@ func (l *Loader) load(cfg interface{}, paths ...string) (map[string]*hcl.File, h
 	}
 	body := hcl.MergeFiles(parsed)
 	ctx := l.NewEvalContext()
-	variables, variablesDiags := impliedVariables(body, ctx, cfg)
+	remain, locals, localDiags := localVariables(body, ctx)
+	diags = append(diags, localDiags...)
+	if diags.HasErrors() {
+		return files, diags
+	}
+	ctx = mergeEvalContextVariables(ctx, locals)
+	variables, variablesDiags := impliedVariables(remain, ctx, cfg)
 	diags = append(diags, variablesDiags...)
 	ctx = mergeEvalContextVariables(ctx, variables)
 
-	diags = append(diags, l.LoadWithBody(body, ctx, cfg)...)
+	diags = append(diags, l.LoadWithBody(remain, ctx, cfg)...)
 	return files, diags
 }
 

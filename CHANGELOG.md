@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.2.1](https://github.com/mashiike/hclconfig/compare/v0.2.0...v0.2.1) - 2022-10-03
+- implement file function by @mashiike in https://github.com/mashiike/hclconfig/pull/10
+
 ## [v0.1.1](https://github.com/mashiike/hclconfig/compare/v0.1.0...v0.1.1) - 2022-10-03
 - util function RestrictOnlyOneBlock by @mashiike in https://github.com/mashiike/hclconfig/pull/8
 

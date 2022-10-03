@@ -158,3 +158,31 @@ func RestrictUniqueBlockLabels(content *hcl.BodyContent) hcl.Diagnostics {
 	}
 	return diags
 }
+
+// RestrictOnlyOneBlock implements the restriction that unique block per block type
+func RestrictOnlyOneBlock(content *hcl.BodyContent, blockTypes ...string) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+	blockRanges := make(map[string]*hcl.Range, len(blockTypes))
+	for _, block := range content.Blocks {
+		contains := false
+		for _, blockType := range blockTypes {
+			if block.Type == blockType {
+				contains = true
+				break
+			}
+		}
+		if !contains {
+			continue
+		}
+		if blockRange, ok := blockRanges[block.Type]; ok {
+			diags = append(diags, NewDiagnosticError(
+				fmt.Sprintf(`Duplicate "%s" block`, block.Type),
+				fmt.Sprintf(`Only one "%s" block is allowed. Another was defined at %s`, block.Type, blockRange.String()),
+				block.DefRange.Ptr(),
+			))
+		} else {
+			blockRanges[block.Type] = block.DefRange.Ptr()
+		}
+	}
+	return diags
+}

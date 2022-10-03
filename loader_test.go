@@ -111,8 +111,8 @@ func (cfg *Flexible) Restrict(content *hcl.BodyContent, ctx *hcl.EvalContext) hc
 		return diags
 	}
 
-	loadDiags := hclconfig.LoadWithBody(cfg.Remain, ctx, cfg.Payload)
-	diags = append(diags, loadDiags...)
+	decodeDiags := hclconfig.DecodeBody(cfg.Remain, ctx, cfg.Payload)
+	diags = append(diags, decodeDiags...)
 	return diags
 }
 
@@ -218,20 +218,20 @@ func TestLoadNoError(t *testing.T) {
 					&Config{
 						Version: ptr("2"),
 						IOMode:  "readonly",
-						Flexibles: []*Flexible{
+						Services: []ServiceConfig{
 							{
-								Type: "string",
-								Name: "hoge",
-								Payload: &FlexibleString{
-									Text: "hoge",
-								},
+								Type:  "http",
+								Name:  "hoge",
+								Addr:  "http://127.0.0.1",
+								Port:  8080,
+								Range: "testdata/local/config.hcl:10,23-23",
 							},
 							{
-								Type: "integer",
-								Name: "tora",
-								Payload: &FlexibleInt{
-									Number: 1,
-								},
+								Type:  "http",
+								Name:  "tora",
+								Addr:  "http://127.0.0.1",
+								Port:  8081,
+								Range: "testdata/local/config.hcl:15,23-23",
 							},
 						},
 					})

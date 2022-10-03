@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.1.1](https://github.com/mashiike/hclconfig/compare/v0.1.0...v0.1.1) - 2022-10-03
+- util function RestrictOnlyOneBlock by @mashiike in https://github.com/mashiike/hclconfig/pull/8
+
 ## [v0.0.4](https://github.com/mashiike/hclconfig/compare/v0.0.3...v0.0.4) - 2022-10-03
 - local variables by @mashiike in https://github.com/mashiike/hclconfig/pull/5
 - Feature/body decoder by @mashiike in https://github.com/mashiike/hclconfig/pull/7

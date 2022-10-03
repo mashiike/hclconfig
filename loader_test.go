@@ -355,5 +355,9 @@ func TestBodyDecoder(t *testing.T) {
 	var d testBodyDecoder
 	err := hclconfig.LoadWithBytes(&d, "config.hcl", []byte(src))
 	require.NoError(t, err)
-	require.EqualValues(t, map[string]interface{}{}, d.data)
+	require.EqualValues(t, map[string]interface{}{
+		"name":    "hoge",
+		"age":     int64(82),
+		"enabled": true,
+	}, d.data)
 }

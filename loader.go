@@ -159,12 +159,10 @@ type BodyDecoder interface {
 // mainly used to achieve partial loading when implementing Restrict functions.
 func (l *Loader) LoadWithBody(body hcl.Body, ctx *hcl.EvalContext, val interface{}) hcl.Diagnostics {
 	decoder, ok := val.(BodyDecoder)
-	var diags hcl.Diagnostics
 	if ok {
-		diags = decoder.DecodeBody(body, ctx)
-	} else {
-		diags = gohcl.DecodeBody(body, ctx, val)
+		return decoder.DecodeBody(body, ctx)
 	}
+	diags := gohcl.DecodeBody(body, ctx, val)
 	if diags.HasErrors() {
 		return diags
 	}

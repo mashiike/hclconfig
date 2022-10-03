@@ -213,6 +213,19 @@ Error: Duplicate service "http" configuration
 A http service named "hoge" was already declared at config/config.hcl:3,1-22. service names must unique per type in a configuration
 ```
 
+### Custom Decode
+
+If the given Config satisfies the following interfaces, call the customized decoding process after calculating Local Variables and Implicit Variables
+
+```go
+type BodyDecoder interface {
+	DecodeBody(hcl.Body, *hcl.EvalContext) hcl.Diagnostics
+}
+```
+
+In this case, it should be noted that Restrictor does not work because all DecodeBody is replaced.
+When using the BodyDecocder interface, additional restrictions, etc., should also be implemented in the DecodeBody function.
+
 ## LICENSE
 
 MIT

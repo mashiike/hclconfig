@@ -4,7 +4,8 @@ locals {
     tora_port = local.hoge_port + 1
 }
 
-io_mode = "readwrite"
+version = "2"
+io_mode = "readonly"
 
 service "http" "hoge" {
   addr = local.addr

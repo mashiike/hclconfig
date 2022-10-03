@@ -2,7 +2,9 @@ package hclconfig
 
 import (
 	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2/ext/tryfunc"
 	ctyyaml "github.com/zclconf/go-cty-yaml"
@@ -130,3 +132,50 @@ var EnvFunc = function.New(&function.Spec{
 		return cty.StringVal(args[1].AsString()).WithMarks(keyMarks), nil
 	},
 })
+
+func MakeFileFunc(basePaths ...string) function.Function {
+	return function.New(&function.Spec{
+		Params: []function.Parameter{
+			{
+				Name:        "path",
+				Type:        cty.String,
+				AllowMarked: true,
+			},
+		},
+		Type: function.StaticReturnType(cty.String),
+		Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
+			pathArg, pathMarks := args[0].Unmark()
+			p := pathArg.AsString()
+			var targetPath string
+			if filepath.IsAbs(p) {
+				targetPath = p
+			} else {
+				for _, basePath := range basePaths {
+
+					path := filepath.Join(basePath, p)
+					if _, err := os.Stat(path); err != nil {
+						continue
+					}
+					targetPath = path
+					break
+				}
+			}
+			if targetPath == "" {
+				return cty.UnknownVal(cty.String), fmt.Errorf("%s not found", p)
+			}
+			fp, err := os.Open(targetPath)
+			if err != nil {
+				err = function.NewArgError(0, err)
+				return cty.UnknownVal(cty.String), err
+			}
+			defer fp.Close()
+			bs, err := io.ReadAll(fp)
+			if err != nil {
+				err = function.NewArgError(0, err)
+				return cty.UnknownVal(cty.String), err
+			}
+			return cty.StringVal(string(bs)).WithMarks(pathMarks), nil
+
+		},
+	})
+}

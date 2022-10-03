@@ -348,16 +348,18 @@ func (d *testBodyDecoder) DecodeBody(body hcl.Body, ctx *hcl.EvalContext) hcl.Di
 
 func TestBodyDecoder(t *testing.T) {
 	src := `
-	name    = "hoge"
-	age     = 82
-	enabled = true
+	name        = "hoge"
+	age         = 82
+	enabled     = true
+	description = file("hoge.txt")
 	`
 	var d testBodyDecoder
-	err := hclconfig.LoadWithBytes(&d, "config.hcl", []byte(src))
+	err := hclconfig.LoadWithBytes(&d, "testdata/config.hcl", []byte(src))
 	require.NoError(t, err)
 	require.EqualValues(t, map[string]interface{}{
-		"name":    "hoge",
-		"age":     int64(82),
-		"enabled": true,
+		"name":        "hoge",
+		"age":         int64(82),
+		"enabled":     true,
+		"description": "this is hoge\n",
 	}, d.data)
 }

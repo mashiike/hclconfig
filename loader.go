@@ -44,16 +44,18 @@ func New() *Loader {
 }
 
 // NewEvalContext creates a new evaluation context.
-func NewEvalContext() *hcl.EvalContext {
-	return defaultLoader.NewEvalContext()
+func NewEvalContext(paths ...string) *hcl.EvalContext {
+	return defaultLoader.NewEvalContext(paths...)
 }
 
 // NewEvalContext creates a new evaluation context.
-func (l *Loader) NewEvalContext() *hcl.EvalContext {
-	return &hcl.EvalContext{
+func (l *Loader) NewEvalContext(paths ...string) *hcl.EvalContext {
+	ctx := &hcl.EvalContext{
 		Variables: l.variables,
 		Functions: l.functions,
 	}
+	ctx.Functions["file"] = MakeFileFunc(paths...)
+	return ctx
 }
 
 // DiagnosticWriter sets up a Writer to write the diagnostic when an error occurs in the Loader.
@@ -104,14 +106,13 @@ type BodyDecoder interface {
 
 // LoadWithBody assigns a value to `val` using a parsed hcl.Body and hcl.EvalContext.
 // mainly used to achieve partial loading when implementing Restrict functions.
-func LoadWithBody(cfg interface{}, body hcl.Body) hcl.Diagnostics {
-	return defaultLoader.LoadWithBody(cfg, body)
+func LoadWithBody(cfg interface{}, ctx *hcl.EvalContext, body hcl.Body) hcl.Diagnostics {
+	return defaultLoader.LoadWithBody(cfg, ctx, body)
 }
 
 // LoadWithBody assigns a value to `val` using a parsed hcl.Body and hcl.EvalContext.
 // mainly used to achieve partial loading when implementing Restrict functions.
-func (l *Loader) LoadWithBody(cfg interface{}, body hcl.Body) hcl.Diagnostics {
-	ctx := l.NewEvalContext()
+func (l *Loader) LoadWithBody(cfg interface{}, ctx *hcl.EvalContext, body hcl.Body) hcl.Diagnostics {
 	remain, locals, diags := localVariables(body, ctx)
 	if diags.HasErrors() {
 		return diags
@@ -176,7 +177,8 @@ func (l *Loader) Load(cfg interface{}, paths ...string) error {
 		parsed = append(parsed, f)
 	}
 	body := hcl.MergeFiles(parsed)
-	diags = append(diags, l.LoadWithBody(cfg, body)...)
+	ctx := l.NewEvalContext(paths...)
+	diags = append(diags, l.LoadWithBody(cfg, ctx, body)...)
 	return l.writeDiags(diags, files)
 }
 
@@ -226,6 +228,7 @@ func (l *Loader) LoadWithBytes(cfg interface{}, filename string, src []byte) err
 	if diags.HasErrors() {
 		return l.writeDiags(diags, parser.Files())
 	}
-	diags = append(diags, l.LoadWithBody(cfg, file.Body)...)
+	ctx := l.NewEvalContext(filepath.Dir(filename))
+	diags = append(diags, l.LoadWithBody(cfg, ctx, file.Body)...)
 	return l.writeDiags(diags, parser.Files())
 }

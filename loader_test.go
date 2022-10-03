@@ -329,3 +329,31 @@ func convertDiagnosticToString(diag *hcl.Diagnostic) string {
 	}
 	return builder.String()
 }
+
+type testBodyDecoder struct {
+	data map[string]interface{}
+}
+
+func (d *testBodyDecoder) DecodeBody(body hcl.Body, ctx *hcl.EvalContext) hcl.Diagnostics {
+	attrs, diags := body.JustAttributes()
+	d.data = make(map[string]interface{}, len(attrs))
+	for key, attr := range attrs {
+		var v interface{}
+		decodeDiags := hclconfig.DecodeExpression(attr.Expr, ctx, &v)
+		diags = append(diags, decodeDiags...)
+		d.data[key] = v
+	}
+	return diags
+}
+
+func TestBodyDecoder(t *testing.T) {
+	src := `
+	name    = "hoge"
+	age     = 82
+	enabled = true
+	`
+	var d testBodyDecoder
+	err := hclconfig.LoadWithBytes(&d, "config.hcl", []byte(src))
+	require.NoError(t, err)
+	require.EqualValues(t, map[string]interface{}{}, d.data)
+}

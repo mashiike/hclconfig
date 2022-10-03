@@ -149,10 +149,22 @@ func LoadWithBody(body hcl.Body, ctx *hcl.EvalContext, val interface{}) hcl.Diag
 	return defaultLoader.LoadWithBody(body, ctx, val)
 }
 
+// BodyDecoder is an interface for custom decoding methods.
+// If the load target does not satisfy this interface, gohcl.DecodeBody is used, but if it does, the functions of this interface are used.
+type BodyDecoder interface {
+	DecodeBody(hcl.Body, *hcl.EvalContext) hcl.Diagnostics
+}
+
 // LoadWithBody assigns a value to `val` using a parsed hcl.Body and hcl.EvalContext.
 // mainly used to achieve partial loading when implementing Restrict functions.
 func (l *Loader) LoadWithBody(body hcl.Body, ctx *hcl.EvalContext, val interface{}) hcl.Diagnostics {
-	diags := gohcl.DecodeBody(body, ctx, val)
+	decoder, ok := val.(BodyDecoder)
+	var diags hcl.Diagnostics
+	if ok {
+		diags = decoder.DecodeBody(body, ctx)
+	} else {
+		diags = gohcl.DecodeBody(body, ctx, val)
+	}
 	if diags.HasErrors() {
 		return diags
 	}

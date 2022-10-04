@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/google/go-cmp v0.5.9
-	github.com/hashicorp/hcl/v2 v2.14.0
+	github.com/hashicorp/hcl/v2 v2.14.1
 	github.com/mattn/go-isatty v0.0.16
 	github.com/stretchr/testify v1.8.0
 	github.com/zclconf/go-cty v1.11.0

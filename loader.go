@@ -55,6 +55,10 @@ func (l *Loader) NewEvalContext(paths ...string) *hcl.EvalContext {
 		Functions: l.functions,
 	}
 	ctx.Functions["file"] = MakeFileFunc(paths...)
+	ctx.Functions["templatefile"] = MakeTemplateFileFunc(
+		func() *hcl.EvalContext {
+			return ctx
+		}, paths...)
 	return ctx
 }
 

@@ -237,6 +237,25 @@ func TestLoadNoError(t *testing.T) {
 					})
 			},
 		},
+		{
+			path: "testdata/templatefile",
+			check: func(t *testing.T, cfg *Config) {
+				requireConfigEqual(t,
+					cfg,
+					&Config{
+						IOMode: "readwrite",
+						Services: []ServiceConfig{
+							{
+								Type:  "http",
+								Name:  "hoge",
+								Addr:  "http://prod.example.com",
+								Port:  8080,
+								Range: "testdata/templatefile/config.hcl:7,23-23",
+							},
+						},
+					})
+			},
+		},
 	}
 
 	for _, c := range cases {

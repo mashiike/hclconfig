@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.3.1](https://github.com/mashiike/hclconfig/compare/v0.3.0...v0.3.1) - 2022-10-04
+- Bump github.com/hashicorp/hcl/v2 from 2.14.0 to 2.14.1 by @dependabot in https://github.com/mashiike/hclconfig/pull/12
+- add templatefile func by @mashiike in https://github.com/mashiike/hclconfig/pull/13
+
 ## [v0.2.1](https://github.com/mashiike/hclconfig/compare/v0.2.0...v0.2.1) - 2022-10-03
 - implement file function by @mashiike in https://github.com/mashiike/hclconfig/pull/10
 

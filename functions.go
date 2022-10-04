@@ -1,12 +1,15 @@
 package hclconfig
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/ext/tryfunc"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	ctyyaml "github.com/zclconf/go-cty-yaml"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/function"
@@ -133,6 +136,38 @@ var EnvFunc = function.New(&function.Spec{
 	},
 })
 
+func openFile(path string, basePaths ...string) ([]byte, error) {
+	var targetPath string
+	if filepath.IsAbs(path) {
+		targetPath = path
+	} else {
+		if wd, err := os.Getwd(); err == nil {
+			basePaths = append(basePaths, wd)
+		}
+		for _, basePath := range basePaths {
+			path := filepath.Join(basePath, path)
+			if _, err := os.Stat(path); err != nil {
+				continue
+			}
+			targetPath = path
+			break
+		}
+	}
+	if targetPath == "" {
+		return nil, fmt.Errorf("%s not found", path)
+	}
+	fp, err := os.Open(targetPath)
+	if err != nil {
+		return nil, err
+	}
+	defer fp.Close()
+	bs, err := io.ReadAll(fp)
+	if err != nil {
+		return nil, err
+	}
+	return bs, nil
+}
+
 func MakeFileFunc(basePaths ...string) function.Function {
 	return function.New(&function.Spec{
 		Params: []function.Parameter{
@@ -145,37 +180,66 @@ func MakeFileFunc(basePaths ...string) function.Function {
 		Type: function.StaticReturnType(cty.String),
 		Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
 			pathArg, pathMarks := args[0].Unmark()
-			p := pathArg.AsString()
-			var targetPath string
-			if filepath.IsAbs(p) {
-				targetPath = p
-			} else {
-				for _, basePath := range basePaths {
-
-					path := filepath.Join(basePath, p)
-					if _, err := os.Stat(path); err != nil {
-						continue
-					}
-					targetPath = path
-					break
-				}
-			}
-			if targetPath == "" {
-				return cty.UnknownVal(cty.String), fmt.Errorf("%s not found", p)
-			}
-			fp, err := os.Open(targetPath)
+			content, err := openFile(pathArg.AsString(), basePaths...)
 			if err != nil {
 				err = function.NewArgError(0, err)
 				return cty.UnknownVal(cty.String), err
 			}
-			defer fp.Close()
-			bs, err := io.ReadAll(fp)
-			if err != nil {
-				err = function.NewArgError(0, err)
-				return cty.UnknownVal(cty.String), err
-			}
-			return cty.StringVal(string(bs)).WithMarks(pathMarks), nil
+			return cty.StringVal(string(content)).WithMarks(pathMarks), nil
+		},
+	})
+}
 
+func MakeTemplateFileFunc(newEvalContext func() *hcl.EvalContext, basePaths ...string) function.Function {
+	render := func(args []cty.Value) (cty.Value, error) {
+		if len(args) != 2 {
+			return cty.UnknownVal(cty.DynamicPseudoType), errors.New("require argument length 2")
+		}
+		if ty := args[1].Type(); !ty.IsObjectType() && !ty.IsMapType() {
+			return cty.UnknownVal(cty.DynamicPseudoType), errors.New("require second argument is map or object type")
+		}
+		pathArg, pathMarks := args[0].Unmark()
+		targetFile := pathArg.AsString()
+		src, err := openFile(targetFile, basePaths...)
+		if err != nil {
+			err = function.NewArgError(0, err)
+			return cty.UnknownVal(cty.DynamicPseudoType), err
+		}
+		expr, diags := hclsyntax.ParseTemplate(src, targetFile, hcl.InitialPos)
+		if diags.HasErrors() {
+			return cty.UnknownVal(cty.DynamicPseudoType), diags
+		}
+		ctx := newEvalContext()
+		ctx = ctx.NewChild()
+		ctx.Variables = args[1].AsValueMap()
+		value, diags := expr.Value(ctx)
+		if diags.HasErrors() {
+			return cty.UnknownVal(cty.DynamicPseudoType), diags
+		}
+		return value.WithMarks(pathMarks), nil
+	}
+
+	return function.New(&function.Spec{
+		Params: []function.Parameter{
+			{
+				Name:        "path",
+				Type:        cty.String,
+				AllowMarked: true,
+			},
+			{
+				Name: "variables",
+				Type: cty.DynamicPseudoType,
+			},
+		},
+		Type: func(args []cty.Value) (cty.Type, error) {
+			if !args[0].IsKnown() || args[1].IsKnown() {
+				return cty.DynamicPseudoType, nil
+			}
+			val, err := render(args)
+			return val.Type(), err
+		},
+		Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
+			return render(args)
 		},
 	})
 }

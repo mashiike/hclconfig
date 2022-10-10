@@ -132,8 +132,8 @@ func requireConfigEqual(t *testing.T, cfg1 *Config, cfg2 *Config) {
 	}
 }
 
-func ptr(str string) *string {
-	return &str
+func ptr[T any](v T) *T {
+	return &v
 }
 
 func TestLoadNoError(t *testing.T) {

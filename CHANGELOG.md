@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.4.1](https://github.com/mashiike/hclconfig/compare/v0.4.0...v0.4.1) - 2022-10-10
+- time functions by @mashiike in https://github.com/mashiike/hclconfig/pull/16
+
 ## [v0.3.1](https://github.com/mashiike/hclconfig/compare/v0.3.0...v0.3.1) - 2022-10-04
 - Bump github.com/hashicorp/hcl/v2 from 2.14.0 to 2.14.1 by @dependabot in https://github.com/mashiike/hclconfig/pull/12
 

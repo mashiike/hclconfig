@@ -26,6 +26,7 @@ var defaultFunctions = map[string]function.Function{
 	"can":              tryfunc.CanFunc,
 	"ceil":             stdlib.CeilFunc,
 	"chomp":            stdlib.ChompFunc,
+	"coalesce":         stdlib.CoalesceFunc,
 	"coalescelist":     stdlib.CoalesceListFunc,
 	"compact":          stdlib.CompactFunc,
 	"concat":           stdlib.ConcatFunc,

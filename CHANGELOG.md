@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.6.1](https://github.com/mashiike/hclconfig/compare/v0.6.0...v0.6.1) - 2022-10-13
+- Feature/restrict unique block labels by @mashiike in https://github.com/mashiike/hclconfig/pull/21
+
 ## [v0.6.0](https://github.com/mashiike/hclconfig/compare/v0.5.0...v0.6.0) - 2022-10-13
 - add coalesece by @mashiike in https://github.com/mashiike/hclconfig/pull/18
 - implement reqsrict require block by @mashiike in https://github.com/mashiike/hclconfig/pull/20

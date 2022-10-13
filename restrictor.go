@@ -123,7 +123,7 @@ func RestrictUniqueBlockLabels(content *hcl.BodyContent, blockTypes ...string) h
 		}
 		contains := false
 		for _, blockType := range blockTypes {
-			if block.Type == blockType {
+			if block.Type == blockType || block.Type == "*" {
 				contains = true
 				break
 			}

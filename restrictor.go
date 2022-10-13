@@ -176,7 +176,7 @@ func RestrictOnlyOneBlock(content *hcl.BodyContent, blockTypes ...string) hcl.Di
 	for _, block := range content.Blocks {
 		contains := false
 		for _, blockType := range blockTypes {
-			if block.Type == blockType {
+			if block.Type == blockType || block.Type == "*" {
 				contains = true
 				break
 			}
@@ -204,7 +204,7 @@ func RestrictRequiredBlock(content *hcl.BodyContent, blockTypes ...string) hcl.D
 	for _, block := range content.Blocks {
 		contains := false
 		for _, blockType := range blockTypes {
-			if block.Type == blockType {
+			if block.Type == blockType || block.Type == "*" {
 				contains = true
 				break
 			}

@@ -186,3 +186,32 @@ func RestrictOnlyOneBlock(content *hcl.BodyContent, blockTypes ...string) hcl.Di
 	}
 	return diags
 }
+
+// RestrictRequiredBlock implements the restriction that required block per block type
+func RestrictRequiredBlock(content *hcl.BodyContent, blockTypes ...string) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+	blockExists := make(map[string]bool, len(blockTypes))
+	for _, block := range content.Blocks {
+		contains := false
+		for _, blockType := range blockTypes {
+			if block.Type == blockType {
+				contains = true
+				break
+			}
+		}
+		if !contains {
+			continue
+		}
+		blockExists[block.Type] = true
+	}
+	for _, blockType := range blockTypes {
+		if _, ok := blockExists[blockType]; !ok {
+			diags = append(diags, NewDiagnosticError(
+				fmt.Sprintf(`Missing "%s" block`, blockType),
+				fmt.Sprintf(`A "%s" block is required.`, blockType),
+				content.MissingItemRange.Ptr(),
+			))
+		}
+	}
+	return diags
+}

@@ -74,7 +74,7 @@ func (cfg *Config) Restrict(content *hcl.BodyContent, ctx *hcl.EvalContext) hcl.
 			hclconfig.AttributeRange(content, "io_mode"),
 		))
 	}
-	diags = append(diags, hclconfig.RestrictUniqueBlockLabels(content)...)
+	diags = append(diags, hclconfig.RestrictUniqueBlockLabels(content, "service", "service")...)
 	return diags
 }
 

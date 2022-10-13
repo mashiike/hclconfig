@@ -114,11 +114,21 @@ func restrictStruct(body hcl.Body, ctx *hcl.EvalContext, val reflect.Value) hcl.
 }
 
 // RestrictUniqueBlockLabels implements the restriction that labels for each Block be unique.
-func RestrictUniqueBlockLabels(content *hcl.BodyContent) hcl.Diagnostics {
+func RestrictUniqueBlockLabels(content *hcl.BodyContent, blockTypes ...string) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 	blockRanges := make(map[string]map[string]*hcl.Range, len(content.Blocks))
 	for _, block := range content.Blocks {
 		if len(block.Labels) == 0 {
+			continue
+		}
+		contains := false
+		for _, blockType := range blockTypes {
+			if block.Type == blockType {
+				contains = true
+				break
+			}
+		}
+		if !contains {
 			continue
 		}
 		ranges, ok := blockRanges[block.Type]

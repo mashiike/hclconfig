@@ -10,7 +10,7 @@ require (
 	github.com/mattn/go-isatty v0.0.16
 	github.com/stretchr/testify v1.8.0
 	github.com/zclconf/go-cty v1.11.0
-	github.com/zclconf/go-cty-yaml v1.0.2
+	github.com/zclconf/go-cty-yaml v1.0.3
 	golang.org/x/term v0.0.0-20220722155259-a9ba230a4035
 )
 

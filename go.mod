@@ -5,11 +5,11 @@ go 1.18
 require (
 	github.com/Songmu/flextime v0.1.0
 	github.com/google/go-cmp v0.5.9
-	github.com/hashicorp/hcl/v2 v2.14.1
+	github.com/hashicorp/hcl/v2 v2.15.0
 	github.com/lestrrat-go/strftime v1.0.6
 	github.com/mattn/go-isatty v0.0.16
 	github.com/stretchr/testify v1.8.0
-	github.com/zclconf/go-cty v1.11.0
+	github.com/zclconf/go-cty v1.12.1
 	github.com/zclconf/go-cty-yaml v1.0.2
 	golang.org/x/term v0.0.0-20220722155259-a9ba230a4035
 )

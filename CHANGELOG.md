@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.8.1](https://github.com/mashiike/hclconfig/compare/v0.8.0...v0.8.1) - 2022-12-07
+- Bump github.com/stretchr/testify from 1.8.0 to 1.8.1 by @dependabot in https://github.com/mashiike/hclconfig/pull/24
+
 ## [v0.8.0](https://github.com/mashiike/hclconfig/compare/v0.7.0...v0.8.0) - 2022-12-07
 - Feature/output warn by @mashiike in https://github.com/mashiike/hclconfig/pull/29
 

@@ -147,12 +147,14 @@ func DecodeBody(body hcl.Body, ctx *hcl.EvalContext, cfg interface{}) hcl.Diagno
 }
 
 func (l *Loader) writeDiags(diags hcl.Diagnostics, files map[string]*hcl.File) error {
-	if diags.HasErrors() {
+	if len(diags) > 0 {
 		w := l.diagsWriter
 		if w == nil {
 			w = hcl.NewDiagnosticTextWriter(l.diagsOutput, files, l.width, l.color)
 		}
 		w.WriteDiagnostics(diags)
+	}
+	if diags.HasErrors() {
 		return fmt.Errorf("%d errors occurred. See diagnostics for details", len(diags.Errs()))
 	}
 	return nil

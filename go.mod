@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/Songmu/flextime v0.1.0
 	github.com/google/go-cmp v0.5.9
-	github.com/hashicorp/hcl/v2 v2.15.0
+	github.com/hashicorp/hcl/v2 v2.16.1
 	github.com/lestrrat-go/strftime v1.0.6
 	github.com/mattn/go-isatty v0.0.16
 	github.com/stretchr/testify v1.8.1
